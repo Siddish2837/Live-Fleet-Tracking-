@@ -1,0 +1,2 @@
+1)the employee should be assigned automatically based on driver's location and truck type and capacity
+2)
