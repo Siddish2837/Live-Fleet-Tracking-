@@ -5,6 +5,36 @@ import { motion } from 'framer-motion';
 
 const SuperAdminPanel = ({ cleanlinessScore }) => {
   const [simulationActive, setSimulationActive] = useState(false);
+  const [activeScenario, setActiveScenario] = useState('it_park');
+
+  const scenarios = {
+    it_park: {
+      title: "Predicted Impact: Zone 7 IT Park (+10k Workers)",
+      points: [
+        { icon: AlertTriangle, color: "var(--warning)", label: "Daily waste increased by", strong: "8 tons/day" },
+        { icon: Server, color: "var(--primary)", strong: "45", label: "new smart bins required" },
+        { icon: Activity, color: "var(--secondary)", label: "Recommend opening new", strong: "Recycling Facility in Zone 7" }
+      ]
+    },
+    diwali: {
+      title: "Predicted Impact: Diwali Festival Surge",
+      points: [
+        { icon: AlertTriangle, color: "var(--warning)", label: "Citywide wet waste spiked by", strong: "42%" },
+        { icon: Server, color: "var(--primary)", label: "Requires", strong: "12 extra temporary trucks" },
+        { icon: Activity, color: "var(--secondary)", label: "Landfill inbound reaching critical threshold", strong: "early" }
+      ]
+    },
+    monsoon: {
+      title: "Predicted Impact: Monsoon Season",
+      points: [
+        { icon: AlertTriangle, color: "var(--warning)", label: "Wet waste decomposition rates", strong: "increased dangerously" },
+        { icon: Server, color: "var(--primary)", label: "Route times delayed by avg", strong: "18 mins (waterlogging)" },
+        { icon: Activity, color: "var(--secondary)", label: "Increase collection frequency in low-lying", strong: "Zone 4" }
+      ]
+    }
+  };
+
+  const currentScenario = scenarios[activeScenario];
 
   return (
     <div className="super-admin-view animate-fade">
@@ -40,10 +70,10 @@ const SuperAdminPanel = ({ cleanlinessScore }) => {
           <div className="simulation-controls">
             <div className="input-group">
               <label>Scenario Preset</label>
-              <select>
-                <option>New IT Park (+10k Workers) - Zone 7</option>
-                <option>Diwali Festival Surge - Citywide</option>
-                <option>Monsoon Season - Wet Waste Spike</option>
+              <select value={activeScenario} onChange={(e) => setActiveScenario(e.target.value)}>
+                <option value="it_park">New IT Park (+10k Workers) - Zone 7</option>
+                <option value="diwali">Diwali Festival Surge - Citywide</option>
+                <option value="monsoon">Monsoon Season - Wet Waste Spike</option>
               </select>
             </div>
             <button 
@@ -56,31 +86,67 @@ const SuperAdminPanel = ({ cleanlinessScore }) => {
 
           {simulationActive && (
             <motion.div className="simulation-results" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}}>
-              <h4>Predicted Impact: Zone 7 IT Park</h4>
+              <h4>{currentScenario.title}</h4>
               <ul>
-                <li><AlertTriangle size={14} color="var(--warning)" /> Daily waste increased by <strong>8 tons/day</strong></li>
-                <li><Server size={14} color="var(--primary)" /> <strong>45</strong> new smart bins required</li>
-                <li><Activity size={14} color="var(--secondary)" /> Recommend opening new <strong>Recycling Facility in Zone 7</strong></li>
+                {currentScenario.points.map((pt, idx) => {
+                  const IconComp = pt.icon;
+                  return (
+                    <li key={idx}>
+                      <IconComp size={14} color={pt.color} />
+                      {pt.label.includes('increased by') || pt.label.includes('Requires') || pt.label.includes('Recommend') || pt.label.includes('rates') || pt.label.includes('delayed') || pt.label.includes('threshold') || pt.label.includes('spiked') || pt.label.includes('low-lying') ? (
+                        <span>{pt.label} <strong>{pt.strong}</strong></span>
+                      ) : (
+                        <span><strong>{pt.strong}</strong> {pt.label}</span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </motion.div>
           )}
         </div>
 
-        <div className="glass-card alerts-card">
-          <h2 style={{marginBottom: '1rem'}}>Predictive Alerts</h2>
-          <div className="alert-item danger">
-            <div className="alert-icon"><AlertTriangle size={18} /></div>
-            <div>
-              <strong>Landfill B at risk</strong>
-              <p>Will reach 90% capacity in 12 days based on current routing.</p>
+        <div className="glass-card insights-card">
+          <div className="flex-between" style={{marginBottom: '1.25rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.75rem'}}>
+            <h2 className="flex-center" style={{gap: '0.5rem', margin: 0}}><Activity color="var(--primary)" /> AI Insights Panel</h2>
+            <span style={{fontSize: '0.75rem', background: 'var(--primary)', color: 'var(--bg-deep)', padding: '0.1rem 0.5rem', borderRadius: '10px', fontWeight: 'bold'}}>LIVE</span>
+          </div>
+
+          <div className="insight-section">
+            <h4 style={{color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '0.5rem'}}>Insight</h4>
+            <p style={{fontSize: '1rem', fontWeight: '500', lineHeight: 1.4}}>
+              Fleet imbalance causing landfill bottleneck while recycling unit sits idle.
+            </p>
+          </div>
+
+          <div className="insight-section" style={{marginTop: '1.25rem'}}>
+            <h4 style={{color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '0.5rem'}}>Alerts</h4>
+            <div className="alert-box critical flex-center" style={{gap: '0.5rem', marginBottom: '0.5rem', padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', borderLeft: '3px solid #ef4444', borderRadius: '4px'}}>
+              <AlertTriangle size={14} color="#ef4444" />
+              <span style={{fontSize: '0.85rem', color: '#fff'}}>Zone A bins overflowing in 35 minutes.</span>
+            </div>
+            <div className="alert-box critical flex-center" style={{gap: '0.5rem', padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', borderLeft: '3px solid #ef4444', borderRadius: '4px'}}>
+              <AlertTriangle size={14} color="#ef4444" />
+              <span style={{fontSize: '0.85rem', color: '#fff'}}>Dumpyard inbound critically nearing 90% capacity.</span>
             </div>
           </div>
-          <div className="alert-item warning">
-            <div className="alert-icon"><Activity size={18} /></div>
-            <div>
-              <strong>Festival Surge Expected</strong>
-              <p>Zone 3 history shows 40% spike next weekend. Routing 4 extra trucks.</p>
-            </div>
+
+          <div className="insight-section" style={{marginTop: '1.25rem'}}>
+            <h4 style={{color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '0.5rem'}}>Actions</h4>
+            <button className="btn-secondary w-full" style={{marginBottom: '0.5rem', textAlign: 'left', display: 'flex', gap: '0.5rem'}}>
+              <strong style={{color: 'var(--primary)'}}>[ Redirect T-06 ]</strong> Send Truck T-06 instantly to Zone A.
+            </button>
+            <button className="btn-secondary w-full" style={{textAlign: 'left', display: 'flex', gap: '0.5rem'}}>
+              <strong style={{color: 'var(--primary)'}}>[ Divert Load ]</strong> Force dry waste to Bholakpur unit.
+            </button>
+          </div>
+
+          <div className="insight-section" style={{marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px dashed var(--border-glass)'}}>
+            <h4 style={{color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '0.5rem'}}>Fixes</h4>
+            <ul style={{fontSize: '0.85rem', color: 'var(--text-muted)', paddingLeft: '1.25rem', margin: 0, lineHeight: 1.6}}>
+              <li><strong>[ Execute Reroute ]</strong> Reroute via outer ring road to avoid traffic.</li>
+              <li><strong>[ Enable Overflow ]</strong> Dispatch emergency backup truck to Zone A.</li>
+            </ul>
           </div>
         </div>
       </div>
